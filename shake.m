@@ -11,6 +11,9 @@ function shake(element,sample,eff,cycles,R,R_reference,T,deltat)
 %             the two instruments used for the IC and ID measurements,
 %             respectively. Range from 0 to 1 
 %                e.g. [0.01 0.005]
+%             cycles -- 2 x 1 array that contains the no. of cycles
+%             for the IC and ID measurements, respectively
+%                e.g. [0.01 0.005]
 %             R -- 2 x nisos array that contains the resistance values for
 %             the IC (1st row) and ID (2nd row) measurements, respectively.
 %             By default, all resistors are 10^11 ohms. 
@@ -51,7 +54,7 @@ if (nargin<5)
 end
 
 if (nargin<4)
-        cycles = 40; % fix this at some point - should be defined by R and saturation voltage
+        cycles = [40 40]; % fix this at some point - should be defined by R and saturation voltage
 end
 
 if (nargin<3)
@@ -83,6 +86,9 @@ errormodel.standard.type = 'fixed-sample';
 
 errormodel.standard.eff  = eff(1); % efficiency of the IC measurement
 errormodel.measured.eff  = eff(2); % efficiency of the ID measurement
+
+errormodel.standard.cycles  = cycles(1); % no. of cycles of the IC measurement
+errormodel.measured.cycles  = cycles(2); % no. of cycles of the ID measurement
 
 aIC = 4*k*T*R_reference^2./(deltat*R(1,:));                 % For IC Measurement
 aID = 4*k*T*R_reference^2./(deltat*R(2,:));                 % For ID measurement
