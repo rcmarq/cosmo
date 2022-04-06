@@ -38,6 +38,7 @@ global ISODATA
 % Fundamental constants
 elementarycharge = 1.60217646e-19;  % Coulombs
 k                = 1.3806504e-23;   % Boltzman's constant (m^2 kg s^-2 K^-1)
+Avn              = 6.0221409e+14;   % Avogadro's number (nmol^-1)
 
 nisos = ISODATA.(element).nisos; % number of isotopes for element of interest
 errormodel = ISODATA.(element).errormodel; % errormodel as pre-defined by seterrormodel.m
@@ -63,7 +64,7 @@ if (nargin<4)
 end
 
 if (nargin<3)
-		eff= [0.01 0.01]; % by default, use a different error model for these, as requires two runs.
+		eff= [0.01 0.01]; % by default, use a different error model for these, as these requires two runs.
 end
 
 % Check that the resistor values are set for all isotopes
@@ -75,8 +76,11 @@ if size(R,2) ~= nisos
     return
 end
 
-% Set the amount of sample in nanograms 
-errormodel.sample = sample;
+% Set the amount of sample in nanograms
+MM    = sum(ISODATA.(element).standard.*ISODATA.(element).mass); % molar mass of element
+atoms = Avn*sample/MM; % number of atoms introduced
+
+errormodel.V100  = atoms*elementarycharge*R_reference/(deltat); % voltage at ref. resistance at 100% ionization efficiency
 
 % NOTE: The 'intensity' parameter in the 'measured' and 'standard'
 % substructures are not yet set here, as it will be determined by the

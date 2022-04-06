@@ -1,7 +1,7 @@
 function V=calcratiocovIN(element,composition,errormodel,INisos)
 % Calculate the covariance matrix of the ratios with internal normalization
 % errormodel is the sub-structure for the element of interest that has 
-% INisos are the isotopes to use in the normalisation [n d]
+% INisos are the isotopes used for the internal normalisation [n d]
 
 global ISODATA
 
@@ -50,5 +50,5 @@ r=rho(ni);
 M=covbeams([ni di],[ni di]);  % move denominator to end
 %A=[diag(repmat(1/d,1,length(n))) -n'./(d^2)];
 %A=[(1/d).*eye(length(n)) -n'./(d^2)];
-A=[diag((1/d).*ones(1,length(n))) -n'./(d^2).*(1-r)']
+A=[diag((1/d).*ones(1,length(n))) -n'./(d^2).*(1-r)'];
 V=(A*M)*(A');
