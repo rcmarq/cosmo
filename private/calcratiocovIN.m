@@ -5,13 +5,11 @@ function V=calcratiocovIN(element,composition,errormodel,INisos)
 
 global ISODATA
 
+
+% Convert input of normalization isotopes to indeces
+INisos=ISODATA.(element).isoindex(INisos); 
+
 % Get rho values for the element of interest
-[a,ix]=ismember(INisos,ISODATA.(element).isonum);
-
-if sum(a) == 2
-    INisos = ix; % Convert input of normalization isotopes to indeces
-end
-
 m_i=ISODATA.(element).mass;
 m_j=m_i(INisos(1));
 m_k=m_i(INisos(2));

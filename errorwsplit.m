@@ -64,6 +64,11 @@ sampleID=rawdata.errormodel.V100*split*rawdata.errormodel.measured.eff/cyclesID;
 rawdata.errormodel.standard.intensity=sampleIC;
 rawdata.errormodel.measured.intensity=sampleID;
 
+% Convert isotope mass numbers to index numbers
+errorratio=rawdata.isoindex(errorratio);
+isoinv=rawdata.isoindex(isoinv);
+INisos=rawdata.isoindex(INisos);
+
 % Check that the denominator for the internal normalization is part of
 % the DS inversion isotopes
 
@@ -71,10 +76,6 @@ if ~isempty(INisos) && ~ismember(INisos(2),isoinv)
     disp('Error: the denominator for the internal normalization must be one of the inversion isotopes')
     return
 end
-
-% Convert isotope mass numbers to index numbers
-errorratio=rawdata.isoindex(errorratio);
-isoinv=rawdata.isoindex(isoinv);
 
 if isempty(INisos)
     [m,ix]=max(spike(isoinv));  % find largest spike of those used in inversion
