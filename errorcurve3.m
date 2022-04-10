@@ -134,8 +134,15 @@ if ~isempty(epsisos)
     
     hold on
     for k=epsisos
-        plot(svals,epserrvals(:,k),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
-        minvals(end+1)=min(epserrvals(:,k));
+        
+        if k>INisos(2)
+            l=k-1;
+        else
+            l=k;
+        end
+        
+        plot(svals,epserrvals(:,l),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
+        minvals(end+1)=min(epserrvals(:,l));
         ci=ci+1;
         legend;
     end
