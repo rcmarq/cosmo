@@ -1,7 +1,7 @@
 function shake(element,sample,eff,cycles,R,R_reference,T,deltat)
 
 % SHAKE   Sets up the parameters necessary for performing calculations
-% under the COSMO and ERRORCURVESPLIT functions
+% under the ERRORWSPLIT, COSMO, and ERRORCURVE3 functions
 %
 %  SHAKE(element,sample,eff,cycles,R,R_reference,T,deltaT)
 %             element -- the element of interest. 
