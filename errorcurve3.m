@@ -1,4 +1,4 @@
-function errorcurve3(element,prop,spike,isoinv,INisos,errorratio,alpha,beta,plottype,varargin)
+function errorcurve3(element,prop,spike,isoinv,INisos,epsisos,errorratio,alpha,beta,plottype,varargin)
 %ERRORCURVE3    A plot of error as a function of splitting between the spiked (ID) and
 % unspiked (IC) measurement for a given DS scheme. 
 %  ERRORCURVE3(element,type,prop,spike,isoinv,errorratio,alpha,beta,...)
@@ -8,8 +8,10 @@ function errorcurve3(element,prop,spike,isoinv,INisos,errorratio,alpha,beta,plot
 %                represents a 50-50 mixture of the third and fourth isotopes (57-58 for Fe).
 %             isoinv -- the isotopes used in the inversion, e.g. [54 56 57 58].
 %                By default the first four isotopes are chosen.
-%             INisos -- theisotopes used for the internal normalization,
+%             INisos -- the isotopes used for the internal normalization,
 %                assumes [n d]. 
+%             epsios -- isotopes whose uncertainties in the unspiked
+%                measurement is also shown. In epsilon (part per  10^4) units.
 %             errorratio -- by default, the error on the natural fractionation
 %                factor (known as alpha or alpha) is given. Instead, the
 %                error on a particular ratio can be given by setting errorratio. e.g.
@@ -34,17 +36,20 @@ global ISODATA
 if isempty(ISODATA)
 	dsstartup;
 end
-if (nargin<9) || isempty(plottype)
+if (nargin<10) || isempty(plottype)
 	plottype='default';
 end
-if (nargin<8) || isempty(beta)
+if (nargin<9) || isempty(beta)
 	beta=0;
 end
-if (nargin<7) || isempty(alpha)
+if (nargin<8) || isempty(alpha)
 	alpha=0;
 end
-if (nargin<6) || isempty(errorratio)
+if (nargin<7) || isempty(errorratio)
 	errorratio=[];
+end
+if (nargin<6) || isempty(epsisos)
+	epsisos=[];
 end
 if (nargin<5) || isempty(isoinv)
 	isoinv=[1 2 3 4];
@@ -63,6 +68,8 @@ end
 % Convert isotope mass numbers to index numbers
 errorratio=rawdata.isoindex(errorratio);
 isoinv=rawdata.isoindex(isoinv);
+INisos=rawdata.isoindex(INisos);
+epsisos=rawdata.isoindex(epsisos);
 
 svals=linspace(0.001,0.999,1000);
 errvals=zeros(size(svals));
@@ -78,7 +85,7 @@ else
 	plotvals=errvals;
 end
 
-plot(svals,plotvals,varargin{:});
+plot(svals,plotvals,varargin{:},'DisplayName','ID Meas.');
 mine=min(plotvals);
 xlim([0 1]);
 ylim([0 5*mine]);
@@ -91,3 +98,52 @@ else
 	ylabel(['Error in ' rawdata.isolabel{errorratio(1)} '/' rawdata.isolabel{errorratio(2)} ' (1SD)']);
 end
 title([rawdata.isolabel{isoinv(1)} ', ' rawdata.isolabel{isoinv(2)} ', ' rawdata.isolabel{isoinv(3)} ', ' rawdata.isolabel{isoinv(4)} ' inversion' ])
+
+if ~isempty(epsisos)
+    
+    epserrvals=[];
+    cyclesIC=rawdata.errormodel.standard.cycles; % Number of cycles
+    stdR=rawdata.standard./rawdata.standard(INisos(2)); % Get standard ratios
+    stdR=stdR(1:rawdata.nisos~=INisos(2)); % Exclude identity ratio of norm. isotope
+    
+    for j=1:length(svals)
+        % Update the voltage based o the splitting value
+        sampleIC=rawdata.errormodel.V100*(1-svals(j))*rawdata.errormodel.standard.eff/cyclesIC; % total voltage of sample per cycle
+        rawdata.errormodel.standard.intensity=sampleIC;
+        
+        % Solve for the covariance matrix of the standard
+        V=calcratiocovIN(element,rawdata.standard,rawdata.errormodel.standard,INisos);
+        
+        % Converting to uncertainty in epsilon (parts per 10^4) units
+        epserrvals(j,:)=sqrt(diag(V))'./stdR.*10000;
+    end
+    
+    WAcolors = [0.7412    0.1216    0.1373
+                0.8314    0.5686    0.3490
+                0.2667    0.2824    0.4118
+                0.4667    0.6353    0.5843
+                0.4078    0.6000    0.6471
+                0.6549    0.4863    0.4627
+                0.8353    0.5255    0.4627
+                0.4549    0.0510    0.1020
+                0.2784    0.5294    0.6627];
+    
+    yyaxis right;
+    minvals=[]; % minimum uncertainty values
+    ci=1;
+    
+    hold on
+    for k=epsisos
+        plot(svals,epserrvals(:,k),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
+        minvals(end+1)=min(epserrvals(:,k));
+        ci=ci+1;
+        legend;
+    end
+    
+    set(gca,'YColor','k');
+    ylim([0 5*max(minvals)]);
+    ylabel('Error in \epsilon (1SD)','Color','k');
+    
+    hold off
+    
+end
