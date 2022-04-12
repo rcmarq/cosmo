@@ -21,4 +21,4 @@ Similar to the original `cocktail.m` function, but considers the splitting of th
 Error curve that shows uncertainties in &#945; as a function of the sample splitting between spiked and unspiked measurements. The user also has the option to display the uncertainty in the standard/unspiked measurement in &#949; units.
 
 6. `errorsurface.m`<br>
-2d projection of error surface on &#945 (or corresponding ppm/amu uncertainty) as a function of the sample splitting and the spike proportion in the spike-sample mixture. 
+2d projection of error surface on &#945; (or corresponding ppm/amu uncertainty) as a function of the sample splitting and the spike proportion in the spike-sample mixture. 
