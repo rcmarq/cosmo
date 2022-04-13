@@ -21,10 +21,6 @@ composition=composition./sum(composition);
 
 meanbeams=composition.*errormodel.intensity;
 
-%if isequal(errormodel.type, 'fixed-sample')
-%meanbeams = meanbeams/(1.0 - prop);
-%end
-
 covbeams=calcbeamcov(meanbeams,errormodel);
 V=covbeamtoratioIN(meanbeams,covbeams,INisos,rho_i);
 
@@ -49,6 +45,7 @@ r=rho(ni);
 M=covbeams([ni di],[ni di]);  % move denominator to end
 %A=[diag(repmat(1/d,1,length(n))) -n'./(d^2)];
 %A=[(1/d).*eye(length(n)) -n'./(d^2)];
-A=[diag((1/d).*ones(1,length(n))) -n'./(d^2).*(1-r)'];
+A=[diag((1/d).*ones(1,length(n))) n'./(d^2).*(r-1)'];
 A(:,ninorm)=-r.*n./(n(ninorm)*d);
+A(ninorm,end)=-n(ninorm)/(d^2);
 V=(A*M)*(A');

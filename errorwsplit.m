@@ -107,13 +107,12 @@ measured=measured/sum(measured);
 %isonorm=isoinv;  % normalise so that only the sum of beams used in the inversion is the mean intensity
 isonorm=1:rawdata.nisos; % normalise so that the sum of all beams is the mean intensity
 if isempty(INisos)
-    in.VAn=calcratiocov(rawdata.standard,rawdata.errormodel.standard,in.di,isonorm,prop)./cyclesIC;
+    in.VAn=calcratiocov(rawdata.standard,rawdata.errormodel.standard,in.di,isonorm,0)./cyclesIC; % prop set at 0 since no spike at N meas.
 else
     in.VAn=calcratiocovIN(element,rawdata.standard,rawdata.errormodel.standard,INisos)./cyclesIC;
-end     
+end
 in.VAT=calcratiocov(spike,rawdata.errormodel.spike,in.di,isonorm,prop);
 in.VAm=calcratiocov(measured,rawdata.errormodel.measured,in.di,isonorm,prop)./cyclesID;
-
 [Vz, VAN]=fcerrorpropagation(z,in.AP,in.An,in.AT,in.Am,in.VAn,in.VAT,in.VAm,in.srat);
 
 % Error to return
