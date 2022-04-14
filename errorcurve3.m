@@ -115,7 +115,7 @@ if ~isempty(epsisos)
         V=calcratiocovIN(element,rawdata.standard,rawdata.errormodel.standard,INisos);
         
         % Converting to uncertainty in epsilon (parts per 10^4) units
-        epserrvals(j,:)=sqrt(diag(V))'./stdR.*10000;
+        epserrvals(j,:)=sqrt(diag(V)/cyclesIC)'./stdR.*10000;
     end
     
     WAcolors = [0.7412    0.1216    0.1373
