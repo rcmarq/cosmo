@@ -99,6 +99,11 @@ else
 end
 title([rawdata.isolabel{isoinv(1)} ', ' rawdata.isolabel{isoinv(2)} ', ' rawdata.isolabel{isoinv(3)} ', ' rawdata.isolabel{isoinv(4)} ' inversion' ])
 
+% Remove internal normalizing isotopes as option for epsisos since by
+% construction, eps=0;
+epsisos=epsisos(epsisos~=INisos(1));
+epsisos=epsisos(epsisos~=INisos(2));
+
 if ~isempty(epsisos)
     
     epserrvals=[];
@@ -133,14 +138,10 @@ if ~isempty(epsisos)
     ci=1;
     
     hold on
+    ni=ISODATA.(element).isoindex(1:ISODATA.(element).nisos);
+    ni=ni(ni~=4);
     for k=epsisos
-        
-        if k>INisos(2)
-            l=k-1;
-        else
-            l=k;
-        end
-        
+        l=find(ni==k);
         plot(svals,epserrvals(:,l),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
         minvals(end+1)=min(epserrvals(:,l));
         ci=ci+1;
