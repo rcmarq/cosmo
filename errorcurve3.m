@@ -112,7 +112,7 @@ if ~isempty(epsisos)
     stdR=stdR(1:rawdata.nisos~=INisos(2)); % Exclude identity ratio of norm. isotope
     
     for j=1:length(svals)
-        % Update the voltage based o the splitting value
+        % Update the voltage based on the splitting value
         sampleIC=rawdata.errormodel.V100*(1-svals(j))*rawdata.errormodel.standard.eff/cyclesIC; % total voltage of sample per cycle
         rawdata.errormodel.standard.intensity=sampleIC;
         
@@ -139,7 +139,7 @@ if ~isempty(epsisos)
     
     hold on
     ni=ISODATA.(element).isoindex(1:ISODATA.(element).nisos);
-    ni=ni(ni~=4);
+    ni=ni(ni~=INisos(2));
     for k=epsisos
         l=find(ni==k);
         plot(svals,epserrvals(:,l),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
