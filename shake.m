@@ -87,7 +87,7 @@ errormodel.V100  = atoms*elementarycharge*R_reference/(deltat); % voltage at ref
 % splitting of the sample - which is a variable set during the calculation
 % of uncertainties by ERRORESTIMATESPLIT.m
 
-% Set all error models to be of type 'fixed-total' 
+% Set all error models to be of type 'fixed-sample' 
 % and add 'cycles','effIC', and 'effID' parameter
 errormodel.measured.type = 'fixed-sample';
 errormodel.spike.type    = 'fixed-sample';
