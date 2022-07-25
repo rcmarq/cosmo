@@ -36,7 +36,7 @@ function V=covbeamtoratioIN(meanbeams,covbeams,INisos,rho)
 di=INisos(2);
 isonums=1:length(meanbeams);
 ni=isonums(isonums~=di);
-[~,ninorm]=ismember(INisos(1),ni);
+[~,ninorm]=ismember(INisos(1),ni); % index of the numerator for the normalization amongst the non-denominator isotopes (ni)
 
 n=meanbeams(ni);
 d=meanbeams(di);
@@ -47,5 +47,5 @@ M=covbeams([ni di],[ni di]);  % move denominator to end
 %A=[(1/d).*eye(length(n)) -n'./(d^2)];
 A=[diag((1/d).*ones(1,length(n))) n'./(d^2).*(r-1)'];
 A(:,ninorm)=-r.*n./(n(ninorm)*d);
-A(ninorm,end)=-n(ninorm)/(d^2);
+A(ninorm,:)=0;
 V=(A*M)*(A');
