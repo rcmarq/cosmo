@@ -9,7 +9,9 @@ function errorcurve3(element,prop,spike,isoinv,INisos,epsisos,errorratio,alpha,b
 %             isoinv -- the isotopes used in the inversion, e.g. [54 56 57 58].
 %                By default the first four isotopes are chosen.
 %             INisos -- the isotopes used for the internal normalization,
-%                assumes [n d]. 
+%                assumes [n d]. If a 2-row array, the second row is assumed
+%                to be the internal normalization scheme for reporting
+%                isotope anomalies.
 %             epsios -- isotopes whose uncertainties in the unspiked
 %                measurement is also shown. In epsilon (part per  10^4) units.
 %             errorratio -- by default, the error on the natural fractionation
@@ -72,6 +74,12 @@ end
 errorratio=rawdata.isoindex(errorratio);
 isoinv=rawdata.isoindex(isoinv);
 INisos=rawdata.isoindex(INisos);
+if size(INisos,1) == 2
+    INisosRep = INisos(2,:);
+    INisos = INisos(1,:);
+else
+    INisosRep = INisos;
+end
 epsisos=rawdata.isoindex(epsisos);
 
 svals=linspace(0.001,0.999,1000);
@@ -104,15 +112,15 @@ title([rawdata.isolabel{isoinv(1)} ', ' rawdata.isolabel{isoinv(2)} ', ' rawdata
 
 % Remove internal normalizing isotopes as option for epsisos since by
 % construction, eps=0;
-epsisos=epsisos(epsisos~=INisos(1));
-epsisos=epsisos(epsisos~=INisos(2));
+epsisos=epsisos(epsisos~=INisosRep(1));
+epsisos=epsisos(epsisos~=INisosRep(2));
 
 if ~isempty(epsisos)
     
     epserrvals=[];
     cyclesIC=rawdata.errormodel.standard.cycles; % Number of cycles
-    stdR=rawdata.standard./rawdata.standard(INisos(2)); % Get standard ratios
-    stdR=stdR(1:rawdata.nisos~=INisos(2)); % Exclude identity ratio of norm. isotope
+    stdR=rawdata.standard./rawdata.standard(INisosRep(2)); % Get standard ratios
+    stdR=stdR(1:rawdata.nisos~=INisosRep(2)); % Exclude identity ratio of norm. isotope
     
     for j=1:length(svals)
         % Update the voltage based on the splitting value
@@ -120,7 +128,7 @@ if ~isempty(epsisos)
         rawdata.errormodel.standard.intensity=sampleIC;
         
         % Solve for the covariance matrix of the standard
-        V=calcratiocovIN(element,rawdata.standard,rawdata.errormodel.standard,INisos);
+        V=calcratiocovIN(element,rawdata.standard,rawdata.errormodel.standard,INisosRep);
         
         % Converting to uncertainty in epsilon (parts per 10^4) units
         epserrvals(j,:)=sqrt(diag(V)/cyclesIC)'./stdR.*10000;
@@ -142,7 +150,7 @@ if ~isempty(epsisos)
     
     hold on
     ni=ISODATA.(element).isoindex(1:ISODATA.(element).nisos);
-    ni=ni(ni~=INisos(2));
+    ni=ni(ni~=INisosRep(2));
     for k=epsisos
         l=find(ni==k);
         plot(svals,epserrvals(:,l),'--','Color',WAcolors(ci,:),'DisplayName',['\epsilon ' rawdata.isolabel{k}]);
