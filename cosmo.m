@@ -134,7 +134,7 @@ end
 
 if isempty(INisos)
 	INisosv=combnk(1:rawdata.nspikes,2);
-    INisosv=sortrows([INisosv; INisosv(:,2) INisosv(:,1)],2);
+    INisosv=sortrows(INisosv,2);
 else
 	INisosv=INisos;
 end
@@ -146,7 +146,12 @@ isonormvals=[];           % internal normalization values to check
 for (i=1:size(isoinv,1))
     isospikev = combnk(isoinv(i,:),2); % spiked isotopes are always part of the inversion
     for (j=1:size(isospikev,1))
-        INv = INisosv(find(ismember(INisosv(:,2),isoinv(i,:))),:); % internal norm denominator always part of inversion
+        INv = INisosv(find(any(sum(ismember(INisosv,isoinv(i,:)),2),2)),:); % internal normalization pairs that has at least one of the inversion isotopes
+        for (k=1:size(INv,1)) % this makes sure that the denominator is part of the set of inversion isotopes
+            if ~ismember(INv(k,2),isoinv(i,:))
+                INv(k,:) = [INv(k,2) INv(k,1)];
+            end
+        end
         isonormvals=[isonormvals; INv];
         isospikevals=[isospikevals; repmat(isospikev(j,:),size(INv,1),1)];
         isoinvvals=[isoinvvals; repmat(isoinv(i,:),size(INv,1),1)];
