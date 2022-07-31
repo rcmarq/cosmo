@@ -1,6 +1,6 @@
 # cosmo
 
-`cosmo` is a suite of add-on functions to the original <a href="">Double Spike Toolbox</a>. These functions allow for the optimization of a double spike suited for analyzing samples with mass-independent isotope effects (<i>i.e.</i>, radiogenic excess, nucleosynthetic anomalies). These scripts can simply be copied and pasted to an existing download of the Double Spike Toolbox that has the 'fixed voltage' error model (v. 1.02 or later). 
+`cosmo` is a suite of add-on functions to the original <a href="https://github.com/johnrudge/doublespike">Double Spike Toolbox</a>. These functions allow for the optimization of a double spike suited for analyzing samples with mass-independent isotope effects (<i>i.e.</i>, radiogenic excess, nucleosynthetic anomalies). These scripts can simply be copied and pasted to an existing download of the Double Spike Toolbox that has the 'fixed voltage' error model (v. 1.02 or later). 
 
 ### New functionalities
 The seven additional (7) functions are described below:
