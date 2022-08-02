@@ -13137,7 +13137,7 @@ Type &#34;global ISODATA&#34; to access and set these parameters.
 
 <span class="c">% fractionation factors</span>
 <span class="n">alpha</span><span class="p">=</span><span class="mf">0.035</span><span class="p">;</span> <span class="c">% equivalent to 1‰ in 138/134 Ba</span>
-<span class="nb">beta</span><span class="p">=</span><span class="mf">1.80</span><span class="p">;</span>   <span class="c">% largest instrumental frac. from Table 3 Albarede et al. (2015)</span>
+<span class="nb">beta</span><span class="p">=</span><span class="mf">1.75</span><span class="p">;</span>   <span class="c">% instrumental frac. from Table 3 Albarede et al. (2015) closest to mass of Ba isotopes</span>
 </pre></div>
 
     </div>
@@ -13151,7 +13151,7 @@ Type &#34;global ISODATA&#34; to access and set these parameters.
 <p>Here, we run the <code>shake.m</code> function in order to (1) introduce the error model on the standard/unspiked measurement (by default, this is set at 0 for the original Double Spike Toolbox), and (2) modify the voltage of the sample in the error model.</p>
 <p>For this test, we choose to have 40 cycles each for both IC (unspiked) and ID (spiked) measurement, wherein the sample corresponds to ~10V beam total. This means that the IC measurement shows 10 V per integraion, while the ID measurement shows 10/(1-prop) V/integration.</p>
 <p>Below, we can calculate the equivalent sample amount (in ng) to reflect our intended measurement scenario:</p>
-$$ng\ sample = \frac{U\cdot t\cdot MM_{Ba}}{e\cdot R_{ref}\cdot Av.}$$
+$$ng\ sample = \frac{U\cdot t\cdot MM_{Ba}}{e\cdot R_{ref}\cdot Av.}\times\frac{1}{eff}$$
 </div>
 </div>
 </div>
@@ -13165,11 +13165,12 @@ $$ng\ sample = \frac{U\cdot t\cdot MM_{Ba}}{e\cdot R_{ref}\cdot Av.}$$
 <span class="n">Avn</span><span class="p">=</span><span class="mf">6.0221409e+14</span><span class="p">;</span>   <span class="c">% Avogadro&#39;s number (nmol^-1)</span>
 <span class="n">MM</span><span class="p">=</span><span class="n">sum</span><span class="p">(</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="o">.*</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">mass</span><span class="p">);</span> <span class="c">% molar mass of element</span>
 
-<span class="n">U</span><span class="p">=</span><span class="mi">80000</span><span class="p">;</span> <span class="c">% volts</span>
+<span class="n">U</span><span class="p">=</span><span class="mi">800</span><span class="p">;</span> <span class="c">% volts</span>
 <span class="n">deltat</span><span class="p">=</span><span class="mi">8</span><span class="p">;</span> <span class="c">% seconds</span>
 <span class="n">R_ref</span><span class="p">=</span><span class="mf">1e11</span><span class="p">;</span> <span class="c">% ohms</span>
+<span class="n">eff</span><span class="p">=</span><span class="mf">0.01</span><span class="p">;</span> <span class="c">% ionization efficiency </span>
 
-<span class="n">ng_sample</span><span class="p">=</span><span class="n">U</span><span class="o">*</span><span class="n">deltat</span><span class="o">*</span><span class="n">MM</span><span class="o">/</span><span class="p">(</span><span class="n">elementarycharge</span><span class="o">*</span><span class="n">R_ref</span><span class="o">*</span><span class="n">Avn</span><span class="p">)</span>
+<span class="n">ng_sample</span><span class="p">=</span><span class="n">U</span><span class="o">*</span><span class="n">deltat</span><span class="o">*</span><span class="n">MM</span><span class="o">/</span><span class="p">(</span><span class="n">elementarycharge</span><span class="o">*</span><span class="n">R_ref</span><span class="o">*</span><span class="n">Avn</span><span class="p">)</span><span class="o">/</span><span class="n">eff</span>
 </pre></div>
 
     </div>
@@ -13202,8 +13203,8 @@ ng_sample =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In this scenario, we are dealing with ~9 ng of Ba. This is relatively low compared to most applications (typically 30 ng in seawater, <a href="https://doi.org/10.1016/j.epsl.2015.07.027">Horner et al., 2015</a>) and is thus a good example for the typical applications where the splitting would be an important parameter to consider.</p>
-<p>Using these parameters, we run the shake.m functioon to setup our simulation:</p>
+<p>In this scenario, we are dealing with ~9 ng of Ba. This is relatively low compared to most applications (typically 30 ng in seawater, <a href="https://doi.org/10.1016/j.epsl.2015.07.027">Horner et al., 2015</a>) and is thus a good example for the an application where the splitting would be an important parameter to consider.</p>
+<p>Using these parameter values, we run the shake.m function to setup our simulation:</p>
 
 </div>
 </div>
@@ -13213,14 +13214,12 @@ ng_sample =
 <div class="prompt input_prompt">In&nbsp;[4]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">R</span> <span class="p">=</span> <span class="p">[</span><span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span><span class="p">;</span>
-     <span class="n">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11]</span><span class="p">;</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">R</span><span class="p">=[</span><span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span><span class="p">;</span>
+   <span class="n">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11]</span><span class="p">;</span>
      
-<span class="n">effIC</span> <span class="p">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="c">% ionization efficiency of the IC measurement</span>
-<span class="n">effID</span> <span class="p">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="c">% ionization efficiency of the ID measurement</span>
-<span class="n">T</span>     <span class="p">=</span> <span class="mi">300</span><span class="p">;</span> <span class="c">% temperature of the resistor/faraday cup; in Kelvin</span>
+<span class="n">T</span><span class="p">=</span><span class="mi">300</span><span class="p">;</span> <span class="c">% temperature of the resistor/faraday cup; in Kelvin</span>
 
-<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">ng_sample</span><span class="p">,[</span><span class="n">effIC</span> <span class="n">effID</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
+<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">ng_sample</span><span class="p">,[</span><span class="n">eff</span> <span class="n">eff</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13231,7 +13230,7 @@ ng_sample =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Here, we adjust the error model for the measurement to reflect the fact that the sample represents 10V of each cycle of measurement.</p>
+<p>We can now check if the error model for the measurement reflects the fact that the sample represents 10V of each cycle of measurement.</p>
 
 </div>
 </div>
@@ -13315,7 +13314,8 @@ ans =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="1.2.-Generating-simulated-beams-using-monterun.m">1.2. Generating simulated beams using <code>monterun.m</code><a class="anchor-link" href="#1.2.-Generating-simulated-beams-using-monterun.m">&#182;</a></h3><p>Here, we assume that beta varies with 2RSD = 10% throughout the run.</p>
+<h3 id="1.2.-Generating-artifical-beam-voltages-using-a-monte-carlo-simulation">1.2. Generating artifical beam voltages using a monte carlo simulation<a class="anchor-link" href="#1.2.-Generating-artifical-beam-voltages-using-a-monte-carlo-simulation">&#182;</a></h3><p>In order to test whether the predicted errors from <code>cosmo</code> are indeed accurate, we generate simulated beams using a monte carlo simulation. One of the important parameters taken into account by <code>cosmo</code> is the uncertainty added by internal normalization. While indeed, the uncertainty from the normalizing isotopes is propagated into the final $\sigma_{\alpha}$, this added error is far less compared to the natural fluctuations we see in the instrumental fractionation, $\beta$.</p>
+<p>For example, we assume that beta varies with RSD = 0.025 throughout the run (based on the typical uncertainty reported in Table 3 by <a href="https://doi.org/10.1039/C5JA00188A">Alberede et al. (2015)</a>. A separate array was simulated for the IC and ID measurements.</p>
 
 </div>
 </div>
@@ -13325,32 +13325,72 @@ ans =
 <div class="prompt input_prompt">In&nbsp;[6]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">RSD</span> <span class="p">=</span> <span class="mf">0.05</span><span class="p">;</span>
-<span class="n">beta_array</span> <span class="p">=</span> <span class="n">normrnd</span><span class="p">(</span><span class="nb">beta</span><span class="p">,</span><span class="nb">beta</span><span class="o">*</span><span class="n">RSD</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">cycles</span><span class="p">);</span> <span class="c">% different betas value per cycle</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">RSD</span> <span class="p">=</span> <span class="mf">0.025</span><span class="p">;</span>
+<span class="n">beta_arrayIC</span> <span class="p">=</span> <span class="n">normrnd</span><span class="p">(</span><span class="nb">beta</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">RSD</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">cycles</span><span class="p">);</span> <span class="c">% different beta values per cycle on IC</span>
+<span class="n">beta_arrayID</span> <span class="p">=</span> <span class="n">normrnd</span><span class="p">(</span><span class="nb">beta</span><span class="p">,</span><span class="mi">2</span><span class="o">*</span><span class="n">RSD</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">cycles</span><span class="p">);</span> <span class="c">% different beta values per cycle on ID</span>
 </pre></div>
 
     </div>
 </div>
 </div>
 
-</div>
-<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
-</div><div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Generating the simulated measurements with the <code>monterun.m</code> included in the original Double Spike Toolbox.</p>
-
-</div>
-</div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
 <div class="prompt input_prompt">In&nbsp;[7]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="p">[</span><span class="n">measuredv</span><span class="p">,</span><span class="n">standardv</span><span class="p">]=</span><span class="n">monterun</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,</span><span class="n">alpha</span><span class="p">,</span><span class="nb">beta</span><span class="p">,</span><span class="n">cycles</span><span class="p">);</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">d</span><span class="p">=</span><span class="mi">135</span><span class="p">;</span> <span class="c">% denominator/reference isotope</span>
+<span class="n">d</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">isoindex</span><span class="p">(</span><span class="n">d</span><span class="p">);</span> <span class="c">% get index of denominator isotope</span>
+
+<span class="n">standard</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="p">;</span> <span class="c">% standard composition</span>
+<span class="n">standardR</span><span class="p">=</span><span class="n">standard</span><span class="o">./</span><span class="n">standard</span><span class="p">(</span><span class="n">d</span><span class="p">);</span> <span class="c">% standard ratios using reference d isotope</span>
+
+<span class="n">mass</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">mass</span><span class="p">;</span> <span class="c">% isotope masses</span>
+<span class="n">massR</span><span class="p">=</span><span class="n">mass</span><span class="o">./</span><span class="n">mass</span><span class="p">(</span><span class="n">d</span><span class="p">);</span> <span class="c">% isotope mass ratios using reference d isotope</span>
+
+<span class="n">fracR</span><span class="p">=</span><span class="n">standardR</span><span class="o">.*</span><span class="p">(</span><span class="n">massR</span><span class="o">.^</span><span class="n">alpha</span><span class="p">);</span> <span class="c">%fractionated ratios, using exponential law</span>
+<span class="n">frac</span><span class="p">=</span><span class="n">fracR</span><span class="o">./</span><span class="n">sum</span><span class="p">(</span><span class="n">fracR</span><span class="p">);</span> <span class="c">%fractionated composition</span>
+
+
+<span class="n">spikeV</span><span class="p">=</span><span class="n">spike</span><span class="o">.*</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">spike</span><span class="p">.</span><span class="n">intensity</span> <span class="c">%voltages from spike</span>
+<span class="n">fracV</span><span class="p">=</span><span class="n">frac</span><span class="o">.*</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">intensity</span> <span class="c">%voltages from fractionated natural samples</span>
+<span class="n">mixV</span><span class="p">=</span><span class="n">fracV</span><span class="o">+</span><span class="n">spikeV</span> <span class="c">%voltage measured with mixture</span>
 </pre></div>
 
     </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+spikeV =
+
+    3.1955    0.0773    0.3095    1.9405    0.4987    0.5673    3.4111
+
+
+fracV =
+
+    0.0106    0.0101    0.2415    0.6588    0.7851    1.1231    7.1709
+
+
+mixV =
+
+    3.2061    0.0874    0.5509    2.5993    1.2839    1.6904   10.5820
+
+</pre>
+</div>
+</div>
+
 </div>
 </div>
 
@@ -13358,7 +13398,7 @@ ans =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Checking that the total beam voltages per cycle is correct</p>
+<p>We can then calculate the variance for individual beams based on Johnson noise and counting statistics (parameters <code>a</code> and <code>b</code> from the <code>errormodel</code>, respectively):</p>
 
 </div>
 </div>
@@ -13368,7 +13408,80 @@ ans =
 <div class="prompt input_prompt">In&nbsp;[8]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">measuredv</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">a</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">a</span><span class="p">;</span>
+<span class="n">b</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">b</span><span class="p">;</span>
+
+<span class="n">mixVariance</span><span class="p">=</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">.*</span><span class="n">mixV</span><span class="p">;</span>
+<span class="n">mixSD</span><span class="p">=</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">mixVariance</span><span class="p">);</span> <span class="c">% also the variance in the ID measurement</span>
+
+<span class="n">fracVariance</span><span class="p">=</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">.*</span><span class="n">fracV</span><span class="p">;</span>
+<span class="n">fracSD</span><span class="p">=</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">fracVariance</span><span class="p">);</span> <span class="c">% also the variance in the IC measurement</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Below, we create 2 arrays, each containing 40 rows of measurements:</p>
+<ol>
+<li><code>measuredV</code> - the voltages of each isotope in the spiked (ID) measurement; each isotope has an uncertainty based on a normal distribution with a $1\sigma$ from <code>mixSD</code>. </li>
+<li><code>standardV</code> - the voltages of each isotope in the unspiked (IC) measurement; each isotope has an uncertainty based on a normal distribution with a $1\sigma$ from <code>fracSD</code>. </li>
+</ol>
+<p>For both arrays, each cycles is fractionated further with an instrumental mass fractionation, $\beta$, from their respective simulated arrays, <code>beta_arrayIC</code> and <code>beta_arrayID</code>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">measuredV</span><span class="p">=[];</span>
+<span class="n">standardV</span><span class="p">=[];</span>
+
+<span class="n">for</span> <span class="s">i=1:cycles</span>
+    <span class="n">mixunfracV</span><span class="p">=</span><span class="n">normrnd</span><span class="p">(</span><span class="n">mixV</span><span class="p">,</span><span class="n">mixSD</span><span class="p">);</span> <span class="c">% generating voltages with variance from normal dist. </span>
+    <span class="n">mixunfracR</span><span class="p">=</span><span class="n">mixunfracV</span><span class="o">./</span><span class="n">mixunfracV</span><span class="p">(</span><span class="n">d</span><span class="p">);</span> <span class="c">% calculating ratios</span>
+    
+    <span class="n">mixfracR</span><span class="p">=</span><span class="n">mixunfracR</span><span class="o">.*</span><span class="p">(</span><span class="n">massR</span><span class="o">.^</span><span class="n">beta_arrayID</span><span class="p">(</span><span class="nb">i</span><span class="p">));</span> <span class="c">% fractionating ratios in the instrument</span>
+    <span class="n">mixfracV</span><span class="p">=</span><span class="n">mixfracR</span><span class="o">./</span><span class="n">sum</span><span class="p">(</span><span class="n">mixfracR</span><span class="p">)</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">mixunfracV</span><span class="p">);</span>
+    
+    <span class="n">measuredV</span><span class="p">(</span><span class="nb">i</span><span class="p">,:)=</span><span class="n">mixfracV</span><span class="p">;</span>
+    
+    <span class="n">stdunfracV</span><span class="p">=</span><span class="n">normrnd</span><span class="p">(</span><span class="n">fracV</span><span class="p">,</span><span class="n">fracSD</span><span class="p">);</span> <span class="c">% generating voltages with variance from normal dist. </span>
+    <span class="n">stdunfracR</span><span class="p">=</span><span class="n">stdunfracV</span><span class="o">./</span><span class="n">stdunfracV</span><span class="p">(</span><span class="n">d</span><span class="p">);</span> <span class="c">% calculating ratios</span>
+    
+    <span class="n">stdfracR</span><span class="p">=</span><span class="n">stdunfracR</span><span class="o">.*</span><span class="p">(</span><span class="n">massR</span><span class="o">.^</span><span class="n">beta_arrayIC</span><span class="p">(</span><span class="nb">i</span><span class="p">));</span> <span class="c">% fractionating ratios in the instrument</span>
+    <span class="n">stdfracV</span><span class="p">=</span><span class="n">stdfracR</span><span class="o">./</span><span class="n">sum</span><span class="p">(</span><span class="n">stdfracR</span><span class="p">)</span><span class="o">*</span><span class="n">sum</span><span class="p">(</span><span class="n">fracV</span><span class="p">);</span>
+    
+    <span class="n">standardV</span><span class="p">(</span><span class="nb">i</span><span class="p">,:)=</span><span class="n">stdfracV</span><span class="p">;</span>
+<span class="n">end</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Checking that the total beam voltages per cycle are correct</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">measuredV</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -13400,10 +13513,10 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[11]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">standardv</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">sum</span><span class="p">(</span><span class="n">standardV</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
 </pre></div>
 
     </div>
@@ -13423,7 +13536,7 @@ ans =
 <pre>
 ans =
 
-   10.0000
+    10
 
 </pre>
 </div>
@@ -13442,7 +13555,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[12]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">alphaID</span><span class="p">=[];</span> <span class="c">%alpha values calculated per cycle</span>
@@ -13450,8 +13563,8 @@ ans =
 
 <span class="n">isoinv</span><span class="p">=[</span><span class="mi">130</span> <span class="mi">134</span> <span class="mi">135</span> <span class="mi">138</span><span class="p">];</span>
 
-<span class="n">for</span> <span class="s">i=1:length(measuredv)</span>
-    <span class="n">out</span><span class="p">=</span><span class="n">dsinversion</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">measuredv</span><span class="p">(</span><span class="nb">i</span><span class="p">,:),</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">);</span>
+<span class="n">for</span> <span class="s">i=1:length(measuredV)</span>
+    <span class="n">out</span><span class="p">=</span><span class="n">dsinversion</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">measuredV</span><span class="p">(</span><span class="nb">i</span><span class="p">,:),</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">);</span>
     
     <span class="n">alphaID</span><span class="p">(</span><span class="nb">i</span><span class="p">)=</span><span class="n">out</span><span class="p">.</span><span class="n">alpha</span><span class="p">;</span>
     <span class="n">betaID</span><span class="p">(</span><span class="nb">i</span><span class="p">)=</span><span class="n">out</span><span class="p">.</span><span class="nb">beta</span><span class="p">;</span>
@@ -13466,7 +13579,92 @@ ans =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Checking that indeed we get the average values expected ($\mu_{\alpha} = 0.035$ and $\mu_{\beta} = 1.80$ as set in <strong>Section 1.1</strong>).</p>
+<p>Checking that indeed we get the average values expected ($\mu_{\alpha} = 0.035$ and $\mu_{\beta} = 1.75$ as set in <strong>Section 1.1</strong>).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">alphaID</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+   -0.0349
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Note that this is negative because of the definition of $\alpha$ in Rudge et al. (2009).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">mean</span><span class="p">(</span><span class="n">betaID</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+    1.7495
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <p>Next, we calculate 1SE for $\alpha$ from these monte carlo runs:</p>
 
 </div>
@@ -13474,7 +13672,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">alpha1SD</span> <span class="p">=</span> <span class="n">std</span><span class="p">(</span><span class="n">alphaID</span><span class="p">)</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">cycles</span><span class="p">)</span>
@@ -13497,7 +13695,7 @@ ans =
 <pre>
 alpha1SD =
 
-   5.9214e-04
+   6.1044e-04
 
 </pre>
 </div>
@@ -13517,15 +13715,18 @@ alpha1SD =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">a</span><span class="p">=</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% setting the standard/unspiked measurement uncertainty to zero</span>
+<span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">a</span><span class="p">=</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span>
 <span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">errormodel</span><span class="p">.</span><span class="n">standard</span><span class="p">.</span><span class="n">b</span><span class="p">=</span><span class="nb">zeros</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">7</span><span class="p">);</span>
+
+<span class="c">% calculating the resulting error with ID as the only source of uncertainty</span>
 <span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">)</span>
 
 <span class="c">%returning the standard error model</span>
-<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">ng_sample</span><span class="p">,[</span><span class="mf">0.01</span> <span class="mf">0.01</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="mi">300</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
+<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">ng_sample</span><span class="p">,[</span><span class="n">eff</span> <span class="n">eff</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -13555,9 +13756,18 @@ ans =
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Indeed, we see that the uncertainty calculated from the <code>errorwsplit.m</code> function is very similar to the resulting uncertainty we observe in our Monte Carlo simulation.</p>
+<p>Next, we can check what the uncertainty would be for out Monte Carlo ID data when we use our simulated IC data as a standard for the inversion:</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[17]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">alphaID2</span><span class="p">=[];</span> <span class="c">%alpha values calculated per cycle</span>
@@ -13565,8 +13775,8 @@ ans =
 
 <span class="n">isoinv</span><span class="p">=[</span><span class="mi">130</span> <span class="mi">134</span> <span class="mi">135</span> <span class="mi">138</span><span class="p">];</span>
 
-<span class="n">for</span> <span class="s">i=1:length(measuredv)</span>
-    <span class="n">out</span><span class="p">=</span><span class="n">dsinversion</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">measuredv</span><span class="p">(</span><span class="nb">i</span><span class="p">,:),</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">,</span><span class="n">standardv</span><span class="p">(</span><span class="nb">i</span><span class="p">,:));</span>
+<span class="n">for</span> <span class="s">i=1:length(measuredV)</span>
+    <span class="n">out</span><span class="p">=</span><span class="n">dsinversion</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">measuredV</span><span class="p">(</span><span class="nb">i</span><span class="p">,:),</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">,</span><span class="n">standardV</span><span class="p">(</span><span class="nb">i</span><span class="p">,:));</span>
     
     <span class="n">alphaID2</span><span class="p">(</span><span class="nb">i</span><span class="p">)=</span><span class="n">out</span><span class="p">.</span><span class="n">alpha</span><span class="p">;</span>
     <span class="n">betaID2</span><span class="p">(</span><span class="nb">i</span><span class="p">)=</span><span class="n">out</span><span class="p">.</span><span class="nb">beta</span><span class="p">;</span>
@@ -13580,7 +13790,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">alpha1SD2</span> <span class="p">=</span> <span class="n">std</span><span class="p">(</span><span class="n">alphaID2</span><span class="p">)</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">cycles</span><span class="p">)</span>
@@ -13603,7 +13813,7 @@ ans =
 <pre>
 alpha1SD2 =
 
-   8.4321e-04
+    0.0110
 
 </pre>
 </div>
@@ -13616,24 +13826,90 @@ alpha1SD2 =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In order to propagate the uncertainty from the standard into the final uncertainty on $\alpha$, here we convert $\sigma_{\alpha}$ into the RSD of a ratio, which here we choose to be $^{137}Ba/^{135}Ba$. From Eq. 6 in Appendix A of Rudge et al. (2009):</p>
+<p>Note that the uncertainty is substantially bigger compared to the data wherein the standard was set to have no uncertainty. If we then examine the uncertainty predicted by <code>errorwsplit.m</code>, we see something interesting:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+   8.6610e-04
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>While this estimate is bigger than the error when the model assumes no uncertainty on the standard, it is orders of magnitude lower compared to the uncertainty we see in the Monte Carlo simulated data.</p>
+<p>This is because the additional uncertainty in the Monte Carlo beams is a compounded effect of:</p>
+<ol>
+<li>The fluctuations of individual beam uncertainties from counting statistics and Johnson noise.</li>
+<li>The fluctuations in instrumental mass fractionation, $\beta$.</li>
+</ol>
+<p>The latter is much bigger than the former, and is not taken into account in the simulation (there is no way to introduce large fluctuations in $\beta$ for calculations in the DS Toolbox - this is a natural limitation of estimating uncertainties analytically).</p>
+<h4 id="The-importance-of-internal-normalization">The importance of internal normalization<a class="anchor-link" href="#The-importance-of-internal-normalization">&#182;</a></h4><p>This scenario highlights the importance of internal normalization - <u> while it introduces additional uncertainty, it is still preferred to apply such a normalization in order to eliminate the large fluctuations inherent in the instrument. </u> It is then the goal of the <code>cosmo</code> software package to identify the internal normalization schemes that would result to minimal additional uncertainties.</p>
+<p>Note that the uncertainty on a spiked measurement that takes into account the uncertainty of an <em>internally-normalized unspiked measurement</em> is analytically-predictable (and is exactly what <code>cosmo</code> does!).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h4 id="1.3.2.-Unspiked-Data">1.3.2. Unspiked Data<a class="anchor-link" href="#1.3.2.-Unspiked-Data">&#182;</a></h4>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In order to propagate the uncertainty from the internally-normalized standard/sample measurement into the final uncertainty on $\alpha$, here we need to convert $\sigma_{\alpha}$ of the spiked measurement into the RSD of a ratio, which here we choose to be $^{137}Ba/^{135}Ba$. From Eq. 6 in Appendix A of Rudge et al. (2009):</p>
 $$n_i=N_i\cdot e^{\alpha P_i}$$<p></p>
-<p>The RSD for the ratio n_i would then be:</p>
+<p>The RSD for the ratio $n_i$ would then be:</p>
 $$RSD_{n_i}=P_i\cdot \sigma_{\alpha}$$
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[20]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">ratisos</span> <span class="p">=</span> <span class="p">[</span><span class="mi">137</span> <span class="mi">135</span><span class="p">];</span>
-<span class="n">ratisos</span> <span class="p">=</span> <span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">isoindex</span><span class="p">(</span><span class="n">ratisos</span><span class="p">);</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">ratisos</span> <span class="p">=</span> <span class="p">[</span><span class="mi">137</span> <span class="mi">135</span><span class="p">];</span> <span class="c">% choice of isotope ratios to use - second isotope is the denominator</span>
+<span class="n">ratisos</span> <span class="p">=</span> <span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">isoindex</span><span class="p">(</span><span class="n">ratisos</span><span class="p">);</span> 
 
 <span class="n">P</span><span class="p">=</span><span class="nb">log</span><span class="p">(</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">mass</span><span class="o">/</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">mass</span><span class="p">(</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">2</span><span class="p">)));</span>
 
-<span class="n">RSD_75</span><span class="p">=</span><span class="n">P</span><span class="p">(</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">alpha1SD</span>
+<span class="n">RSD_75</span><span class="p">=</span><span class="n">P</span><span class="p">(</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">*</span><span class="n">alpha1SD</span> <span class="c">% RSD on the 137/135 ratio</span>
 </pre></div>
 
     </div>
@@ -13653,7 +13929,7 @@ $$RSD_{n_i}=P_i\cdot \sigma_{\alpha}$$
 <pre>
 RSD_75 =
 
-   8.7148e-06
+   8.9841e-06
 
 </pre>
 </div>
@@ -13674,14 +13950,14 @@ RSD_75 =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h4 id="1.3.2.-Unspiked-Data">1.3.2. Unspiked Data<a class="anchor-link" href="#1.3.2.-Unspiked-Data">&#182;</a></h4><p>Here, we process the simulated unspiked measurement (<code>standardv</code>). Here, we choose one particular ratio for the internal normalization (<code>INisos</code> - [j k]), from which we calculate the $\zeta$ using the following equation (Eq. 7 in <a href=https://doi.org/10.1039/C7JA00187H>Hu and Dauphas</a>:</p>
+<p>Here, we process the simulated unspiked measurement (<code>standardV</code>). Here, we choose one particular ratio for the internal normalization (<code>INisos</code> - [j k]), from which we calculate the $\zeta$ using the following equation (Eq. 7 in <a href=https://doi.org/10.1039/C7JA00187H>Hu and Dauphas</a>:</p>
 $$\zeta = \ln\left(\frac{r_{smp}^{j/k}}{R_{ref}^{j/k}}\right)\bigg/\ln\left(\frac{m_j}{m_k}\right)$$
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[21]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="c">% Specifying internal normalization ratio and calculating this ratio per cycle</span>
@@ -13689,10 +13965,10 @@ $$\zeta = \ln\left(\frac{r_{smp}^{j/k}}{R_{ref}^{j/k}}\right)\bigg/\ln\left(\fra
 <span class="n">INisos</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">isoindex</span><span class="p">(</span><span class="n">INisos</span><span class="p">);</span>
 
 <span class="c">% Calculating all ratios - using the same denominator as in ratisos</span>
-<span class="n">R</span><span class="p">=</span><span class="n">standardv</span><span class="o">./</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">R</span><span class="p">=</span><span class="n">standardV</span><span class="o">./</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
 
 <span class="c">% Calculating ratios used for internal normalization</span>
-<span class="n">R_samp</span><span class="p">=</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">./</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">R_samp</span><span class="p">=</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">./</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
 
 <span class="n">INrat_ref</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="p">(</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="p">(</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span> <span class="c">%reference ratio</span>
 <span class="n">massrat_ref</span><span class="p">=</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span> <span class="c">%ln(m_j/m_k)</span>
@@ -13716,14 +13992,14 @@ $$\zeta = \ln\left(\frac{r_{smp}^{j/k}}{R_{ref}^{j/k}}\right)\bigg/\ln\left(\fra
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We can now calculate the 1SE on the $^{137}Ba/^{135}Ba$ ratio for the unspiked measurement:</p>
+<p>We can now calculate the 1SE on the $^{137}Ba/^{135}Ba$ ratio for the <strong>internally-normalized</strong> unspiked measurement:</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[22]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">Ba_75_1SD</span><span class="p">=</span><span class="n">std</span><span class="p">(</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">cycles</span><span class="p">);</span> <span class="c">%1SD</span>
@@ -13747,7 +14023,7 @@ $$\zeta = \ln\left(\frac{r_{smp}^{j/k}}{R_{ref}^{j/k}}\right)\bigg/\ln\left(\fra
 <pre>
 RSD_75Std =
 
-   7.4957e-06
+   7.8123e-06
 
 </pre>
 </div>
@@ -13772,7 +14048,7 @@ $$\sigma_{\alpha} = \frac{1}{P_i}\sqrt{RSD_{r_{smp}}^2+RSD_{R_{std}}^2}$$</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[23]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="mi">1</span><span class="o">/</span><span class="nb">log</span><span class="p">(</span><span class="mi">137</span><span class="o">/</span><span class="mi">135</span><span class="p">)</span><span class="o">*</span><span class="nb">hypot</span><span class="p">(</span><span class="n">RSD_75</span><span class="p">,</span><span class="n">RSD_75Std</span><span class="p">)</span>
@@ -13795,7 +14071,7 @@ $$\sigma_{\alpha} = \frac{1}{P_i}\sqrt{RSD_{r_{smp}}^2+RSD_{R_{std}}^2}$$</p>
 <pre>
 ans =
 
-   7.8164e-04
+   8.0957e-04
 
 </pre>
 </div>
@@ -13815,7 +14091,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[24]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">,</span><span class="n">INisos</span><span class="p">)</span>
@@ -13838,7 +14114,7 @@ ans =
 <pre>
 ans =
 
-   8.6550e-04
+   9.2459e-04
 
 </pre>
 </div>
@@ -13866,7 +14142,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="c">% Specifying internal normalization ratio and calculating this ratio per cycle</span>
@@ -13874,10 +14150,10 @@ ans =
 <span class="n">INisos</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">isoindex</span><span class="p">(</span><span class="n">INisos</span><span class="p">);</span>
 
 <span class="c">% Calculating all ratios - using the same denominator as in ratisos</span>
-<span class="n">R</span><span class="p">=</span><span class="n">standardv</span><span class="o">./</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">R</span><span class="p">=</span><span class="n">standardV</span><span class="o">./</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
 
 <span class="c">% Calculating ratios used for internal normalization</span>
-<span class="n">R_samp</span><span class="p">=</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">./</span><span class="n">standardv</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">R_samp</span><span class="p">=</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">./</span><span class="n">standardV</span><span class="p">(:,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
 
 <span class="n">INrat_ref</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="p">(</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span><span class="n">ISODATA</span><span class="p">.(</span><span class="n">element</span><span class="p">).</span><span class="n">standard</span><span class="p">(</span><span class="n">INisos</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span> <span class="c">%reference ratio</span>
 <span class="n">massrat_ref</span><span class="p">=</span><span class="n">P</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">INisos</span><span class="p">(</span><span class="mi">1</span><span class="p">));</span> <span class="c">%ln(m_j/m_k)</span>
@@ -13900,7 +14176,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">Ba_75_1SD</span><span class="p">=</span><span class="n">std</span><span class="p">(</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">cycles</span><span class="p">);</span> <span class="c">%1SD</span>
@@ -13924,7 +14200,7 @@ ans =
 <pre>
 RSD_75Std =
 
-   3.7078e-05
+   4.0666e-05
 
 </pre>
 </div>
@@ -13945,7 +14221,7 @@ RSD_75Std =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="mi">1</span><span class="o">/</span><span class="nb">log</span><span class="p">(</span><span class="mi">137</span><span class="o">/</span><span class="mi">135</span><span class="p">)</span><span class="o">*</span><span class="nb">hypot</span><span class="p">(</span><span class="n">RSD_75</span><span class="p">,</span><span class="n">RSD_75Std</span><span class="p">)</span>
@@ -13968,7 +14244,7 @@ RSD_75Std =
 <pre>
 ans =
 
-    0.0026
+    0.0028
 
 </pre>
 </div>
@@ -13980,7 +14256,7 @@ ans =
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-matlab"><pre><span></span><span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="n">spike</span><span class="p">,</span><span class="n">isoinv</span><span class="p">,</span><span class="n">INisos</span><span class="p">)</span>
@@ -14003,7 +14279,7 @@ ans =
 <pre>
 ans =
 
-    0.0026
+    0.0024
 
 </pre>
 </div>
@@ -14016,21 +14292,96 @@ ans =
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p>Again, we see that <code>cosmo.m</code> closely predicts the change in uncertainty associated with a change in the internal-normalization isotopes.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
 <p>Below, we can also plot the values for the non-normalized ratios (<code>R</code>) vs. that of the internally-normalized ratios (<code>RIN</code>). Notice the larger variance for the latter.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="1.4.-A-Final-Word-(and-err,-Graph)-on-Internal-Normalization">1.4. A Final Word (and err, Graph) on Internal Normalization<a class="anchor-link" href="#1.4.-A-Final-Word-(and-err,-Graph)-on-Internal-Normalization">&#182;</a></h3><p>As mentioned earlier, <u>**the whole point of internal normalization is to eliminate the fluctuations associated with mass-dependent fractionation in the instrument during measurement, which is far larger that the predicted uncertainties from counting statistics and Johnson Noise.**</u></p>
+<p>Below we can plot the ratios calculated above for a (1) non-normalized set of measurements (<code>R</code>) and (2) internally-normalized set of measurements (<code>RIN</code>). It is immediately clear that the fluctuations in the former are much larger than the latter. Also, note that the two plots have different average values. The internally-normalized ratios have an average value close to that of the standard composition ($\approx 1.7039$), while the non-normalized ratio is offset by a factor $\left(\frac{m_j}{m_k}\right)^{\zeta} = \left(\frac{m_j}{m_k}\right)^{\alpha+\beta} = 1.027$.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-matlab"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">R</span><span class="p">),</span><span class="n">R</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% internally-normalized data</span>
+<span class="n">std75</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">standard</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">/</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">standard</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="c">% standard 137/135 ratio</span>
+<span class="n">mean75IN</span><span class="p">=</span><span class="n">mean</span><span class="p">(</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span> <span class="c">% mean of internally-normalized data</span>
+
+<span class="c">% non-normalized data</span>
+<span class="n">frac75</span><span class="p">=</span><span class="n">std75</span><span class="o">*</span><span class="p">(</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">mass</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">/</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">mass</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>^<span class="p">(</span><span class="n">alpha</span><span class="o">+</span><span class="nb">beta</span><span class="p">)</span>
+<span class="n">mean75</span><span class="p">=</span><span class="n">mean</span><span class="p">(</span><span class="n">R</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+std75 =
+
+    1.7039
+
+
+mean75IN =
+
+    1.7038
+
+
+frac75 =
+
+    1.7492
+
+
+mean75 =
+
+    1.7497
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">R</span><span class="p">),</span><span class="n">R</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mi">0</span> <span class="mf">0.4470</span> <span class="mf">0.7410</span><span class="p">]);</span>
 <span class="n">hold</span> <span class="s">on</span>
-<span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">RIN</span><span class="p">),</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
+<span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">RIN</span><span class="p">),</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mf">0.8500</span> <span class="mf">0.3250</span> <span class="mf">0.0980</span><span class="p">])</span>
+<span class="n">yline</span><span class="p">(</span><span class="n">mean75</span><span class="p">,</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mi">0</span> <span class="mf">0.4470</span> <span class="mf">0.7410</span><span class="p">]);</span>
+<span class="n">yline</span><span class="p">(</span><span class="n">mean75IN</span><span class="p">,</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mf">0.8500</span> <span class="mf">0.3250</span> <span class="mf">0.0980</span><span class="p">]);</span>
 <span class="n">hold</span> <span class="s">off</span>
-<span class="n">legend</span><span class="p">(</span><span class="s">&#39;Non-normalized&#39;</span><span class="p">,</span><span class="s">&#39;Internally-normalized&#39;</span><span class="p">)</span>
+<span class="n">legend</span><span class="p">(</span><span class="s">&#39;Non-normalized&#39;</span><span class="p">,</span><span class="s">&#39;Internally-normalized&#39;</span><span class="p">,</span><span class="s">&#39;Location&#39;</span><span class="p">,</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14049,11 +14400,497 @@ ans =
 
 
 <div class="output_png output_subarea ">
-<img src="data:image/png;base64,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efLko0ePPvzww8OHD09JSbHb7fjjb7zxRnR0tMFguOeee86ePUt8XUtLy+9///vXX389nsSePXsQQp988snkyZPDw8Mff/zxq1ev4v3ffffdSZMmBQcHz58///vvv5fhWg41IA8JAHyC1TXNrx1sVv57X3sktigjdtCW116bPn36X/7yl2XLlhEbm5ubMzMzf/3rX7/zzjtvvfVWRkZGc3NzT09PZWXlkiVLqqur169f/9vf/nbOnDnkQzHuQD/Un/70p6qqqhMnTqxYseLmzZv79u1btmxZTU3N888/P3369LVr177xxhtPPfXU9u3bCwoKvvzyy1deeaW8vHzKlCkvvPDCm2++uWTJEvx1LperqanpiSeeuO+++xBC77333ocffpiUlHTx4sWf/exnv//97x944IGVK1fm5uZWVVVZrdYFCxYUFRVlZGRs2rSJUAoBLtxDl7vuukvtIQCAamjw/v/3v/+NELp69erevXtHjhzZ1ta2ZcuWe+65x+12FxcX33vvvXi369evR0VFbdu2bd++fcHBwS6Xy+12Hz161Gg02my2I7e5fv06fQfGQz333HP+/v7ffPON2+3et29feHh4X1+f2+1es2bNf/7nf+I9Fy1a9NJLL7nd7vPnz+/cudPtdtvt9scffzwzM/Pzzz+PjIx0u93EC3wuoaGhH3zwgdvtXrt27YMPPtja2tra2nrkyBE/Pz+73V5UVJSUlIR37u3tDQ8P/9///V+5r7DHH12DdwUZMNkBAKA0TzzxREpKyq9+9Stiy6VLlyZPnoxfBwUF3X333RcvXkQIYdMZQmj48OEDAwPvvfferNtcvnyZvgPjoRwOx7hx4+Li4vDGUaNGBQQEIIQCAwNjY29pb3gLQmjcuHH19fVms3nixIknTpxgHL/L5XryySeXLFkyf/58hNCFCxeOHj06duzYsWPHTp8+3e12X7582Waz3X333Xj/YcOG6b2GgjKAQAIAQAU2bdpUVVVVVVWF/x09enRbWxvxbmtrK27U6efnR/7Uiy++2Hub8ePH03dgPFRoaOjIkSN5DuxPf/pTTU3NJ5980tnZ+dxzzzHu86tf/cpgMKxfvx7/GxUVlZWV5XQ6nU5nd3f3Z599lpCQYDKZyMO4cuUKzwH4MiCQWGl+btrVPaVqjwIAhibjx49/5ZVX9u3bh/+dO3fu4cOH9+/f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
+<img src="data:image/png;base64,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c+fOH374IS0tbdSoUb///e8tZmVzAutZlZSU7NmzZ/369YsXL7527dquXbuEEOnp6d7e3mPHjn3ggQf2799/9uzZjRs3CiGOHDny0ksvLVu27F//+pe/v/9bb72lv53JZMrPz3/kkUfeeuutt956a8yYMd9//310dPSZM2cefvjhefPmpaenX7lyJT4+XgiRm5v72GOPzZw5MzMzs0ePHnqnEC7BD2OBdmxJesEr+wvc/76vTAhNnhhq/kjPnj1XrFjx61//eurUqfqDH3744a233vrGG28IId57771PP/10586dAQEB3bp1W716tbe393PPPXf//fcXFxefOXNGviQ6OloIYTGBzVkdPXq0uro6KysrLCxs9+7dfn5+K1eu7Ny588MPP2wymV566SUhxLhx48rKyoQQvXv33rRp06xZs8rKyvz9/eWD5mTH6D//+c+OHTs2btwYGhr62muvjRgx4tFHHxVCpKSk3H333WVlZdu2bbvjjjv+8Ic/CCF+/vOfp6WltVUTd0gEEtCOJU+0DAYDPfLII6mpqc8880xsbKx85OzZs8OHD5e3vby8br311jNnzgQEBMihMyFE9+7dGxsbP/rooxdffFFOlpOTI4SwmMDmrMrKygYOHBgWFiYfDAgI6Ny5sxCiS5cuoaE/tol8RAgxcODAt99++8UXX6yuru7evfuIESOs6zeZTI8++ujcuXOnTZsmhDh9+vTBgwcHDBigT1BcXFxUVHTrrbfKu127du0451BwD4bsALjMO++8s2fPnj179si7ffr0KSkp0Z89d+5c3759hRAeHh7mr/rd735Xe92gQYOsJ7A5K19f3169ejlY2P/8z/+kp6d/9tlnlZWVCxYssDnNM8884+3t/eabb8q7gYGBcXFxNTU1NTU1ly9f/uKLLyIjI/v162dexvnz5x0sAI5QJZBycnJWrlxp/XheXt6Gn9qxY4d8ymQybdq0KSUl5b333rt48aJ76wVgw6BBg1566SW5O0cIMXny5M8//3zv3r1CiHXr1uXn50+cONG5OVvPqkVHlhcXF4eGhoaHh5eUlGzZsqW+vt5igk2bNm3btm3Dhg319fU1NTX19fWTJk3at2/fiRMnunbt+u677yYmJnbq1OmXv/xlRkbG/v37NU179913z54969zHgU1KDNmVlZWlpKRUV1cnJiZaPFVUVJSenq7fzc/Pl5stjY2Njz32WEVFxahRoz7//PMNGzbs3r1bbnwBcCeL3szzzz//4Ycfyttjx4794x//OH369GvXrnl7e69fvz4sLCw3N7dFM2xqVj4+PvZfYv7UrFmzpkyZ0rt37y5dujz66KPr1q2799575VMeHh4eHh4rVqy4cuVKZGSkfNV//dd/rVixIikpady4cZqmDRky5J133vH09Lz77rv/8Ic/TJ06VdO0n/3sZwMHDnSojeAgzWjTpk0bOnRoeHj45MmT7U/57bff3nHHHVlZWZqmZWRkREZGnj9/XtO04uLiW265Zdu2bRbTh4eHt1HNgFFYqjsgF/7RFV9+jO8hLV26tK6ubteuXceOHbMzmclkSkhImD9/flRUlBCie/fuTz31VFBQkBDCx8fH09OzZ8+ebqoYANAGjA8k2Uc+fvy4/UCSP6WePXu2vDtq1KhRo0ZVVFSsWrUqMzNzzJgx48ePd0O1AIA2ospBDfZVVVWlpqbOnz/fy8vL/PFr1655eXkFBQXl5uaeOHHC+oX6765tHjEBADe2lStXmp+BwuhymmF8D8kRaWlpmqZNmjRJf8RkMgkh+vTp88ILLwghnnzyydTUVPmTOnNcWxNAR5aYmGh+sJjimdQ+ekhpaWljx4719fXVH1m2bNmMGTP0u2FhYefOnTOiNACAaygaSElJSZs3b5a3NU3Lzc3Vf6QtjRw5Mi8vb/369WVlZQcPHty5c+fo0aONqBQA4BoKBZL5LwnMD7orKSmpqakZPHiw+cQPPfTQvHnzVqxYcdddd82bN+/ee+/93e9+59ZyAQghhCgtLfX09Pzqq6+ammD58uWFhYWuejuXXMfI5bi6kkuosg9p3rx58+bN0++anxz+pptusrkraNGiRc8991xZWZmfn5/FwQ4A3Emze/Wj//7v/77jjjtCQkJc/nb239fNNK6u1GoK9ZCc0KlTp/79+5NGgApsXsfo9ttvLy0tfeKJJ1avXi2srjBkcU0jm5dBauo6RtLEiRNTU1Pl7R07dtx3332OVCVsXaipRRdYsn91JSGE9QWWuLpSs9p3IAEdXPn25d89epP7/5VvX25djM3rGC1fvrx79+6//e1vJ0yYYH2FocuXL5tf08j65XauYyRFRUV98MEH8vaWLVusT+Pt4NWVqqqqLIqxc4GlZq+uJISwuMDSTTfdxNWVmmfkaSLamOInyQCcoOBSLU9tnJWVtWvXrm7duplMJk3TDh486OPjIycIDAzMzMzUNG3ZsmV33XXXuXPnzp079+WXX3p4eKxfv97T0/PUqVOaptl8+cmTJzdt2qRpWmlp6dSpU6dMmfLPf/6zb9++mqbJGzk5OZ6enhcuXKitre3Ro8e///3voqKiL6+7evWqzdmmpKTcfvvtsryrV68GBgZu2LBh27Zt5sX4+fnV19drmvbqq68OGzZMTjxr1qznn3++2ar0xvnuu+98fX137Nhh/dlLS0uTk5Ojo6PllLW1tX5+fn/5y1+sW7jjnDqIHhIAl7G+jpE5/QpDAwYMGDt2rKZp5eXl5tc0T3upowAAFVlJREFUsn75wIEDDx8+HBwcPGTIkKNHj1q/49ChQ0eMGPHJJ5/84x//CAkJuf322z/66KP7risuLrY5W5sXapJv58gFlpqtSjK/wJL1Z+fqStYIJAAuY+es28LWFYaCg4PNr2lk/XJHrmMUHx//8ccf79y5c9asWcLZqyvJawU4eIElR6oSP73AEldXcgSBBKBteXp6Xrx40eYVhjw9m1kFNXsdIyHEjBkzDh069Le//e2xxx5zsKRWXqjJkaosLrAUGxvL1ZWapcph3wDaKfOrCtmc4L777ps5c+aSJUtefvlliysMXbhwwWI+Fpq9jpEQok+fPrGxsZcuXQoODm6qPAs2L9R0/Phx+6/Sn3KkKusLLHF1pWZ5aCodyO9aERERnMsON5gbYKlubGysrKzs06ePg9PX1dWVlZUFBQV5eHiUlZUFBARYp8WoUaOeeuop898yOuLatWsXL17s37+//ZFGp6uyZvOzNzQ0VFRU9OvXr6lXufCPrvjyw5AdALfq1KmT42kkhPDy8rrpppv0zpDFev+f//zntGnTioqKHB+v03l6egYGBjqRRs1W1RSbn71z58520qhDYcgOQDt2zz333HPPPUZXAdeghwQAUAKBBABQAkN2QHsycuRIfj7Z0YwcOdLoEtyEQALak02bNhldAtBWGLIDACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUACACiBQAIAKIFAAgAogUAC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TaUm3b9//y233JKfn69pWk1NzT333PPGG28o1YY2K9RUakNN0zIyMiIjI8+fP69pWnFx8S233LJt2zalmtFmhZpizahpmslkmjRp0rhx45555hlNva+zhRttyO7rr7/28fGJiYkRQnh5eY0fP/7LL780uqifqK+vP336dO/evffu3evn53fnnXd26dLF6KL+j/VpbVVrUusKlWrS8vLyO++8U25y+vj4BAUFVVZWKtWGNitUqg2FEN27d3/qqaeCgoJkkZ6enj179lSqGW1WqFozCiHefPPNiIiIfv36XbhwQaj3dbZwowVSRUVFv379PD1/PFgjMDCwoqLC2JIs5OfnNzY2PvvsswMGDCguLg4ODt60aVOfPn2MrutHkZGRQojjx4/rq3vVmtS6QqWadMaMGXKkXghx7NixEydOzJw5s6ioSJ02tFmhUm0ohBg1atSoUaMqKipWrVqVmZk5ZsyY8ePHr1u3Tp1mtFmhas345Zdfpqen79mzZ82aNfIR1b7OFm60o+yuXbtmftfT07OxsdGoYmxqaGh4+OGH9+7d++mnn6alpVVWVr7zzjtGF2UPTeoETdP++te//vrXv540adJDDz2kYBtaVKhgGwohrl275uXlFRQUlJube+LECQWb0aJCpZqxqqpq8eLFS5cu7d27t3nB5tOo0IbmbrQeUteuXWtqavS71dXV3t7eBtZjbdiwYW+88Ya8ffPNNz/44INZWVnGlmQfTdpSFy9eXLhwYW5u7uLFi2fMmOHh4aFaG1pXqFobmkwmIUSfPn1eeOEFIcSTTz6ZmpoaFRWlTjParPDdd99VpxmXL1/eo0ePS5cu7dy589SpU5cvX967d69qi6KFG62HFBwcXFpaWlZWJu/m5uYqdVCjEGL79u1vvvmmfre6utrwUWb7aNIWMZlMs2bNEkLs27dv5syZ8txXSrWhzQqVakMhxLJly/RxRSFEWFjYuXPnlGpGmxUq1Yy+vr49e/bcvHnz5s2b8/Lyzpw5s3XrVqXa0NqNFkhjxozp1q1bSkrKuXPn9uzZ849//EO/2LkifH19//KXv+zYseOHH374/PPP09LSJkyYYHRR9tCkLbJt27bS0tIXX3yxurq6oKCgoKCgvLxcqTa0WaFSbSiEGDlyZF5e3vr168vKyg4ePLhz587Ro0cr1Yw2K1SqGRctWvTRdQ8++ODo0aM/+OADpdrQBqMP83O9/fv3jxw5Mjw8/JZbblm4cGF9fb3RFVlavnz5sGHDwsPDb7vtttdff72hocHoiiytW7duypQp+l0Fm9SiQnWaNCEhIfynXn31VU2lNmyqQnXaUHrjjTciIyP1FqupqdFUasamKlStGaXXXnvt2WeflbeVakMLN+APY4UQmqaVlZX17NlTqeFRcw0NDRUVFQEBAZ06dTK6FofQpK1HG7ZUY2NjWVmZn5+f+VWhlWpGmxWq1ozWlGpDczdmIAEA2p0bbR8SAKCdIpAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEogkAAASiCQAABKIJAAAEr4//JfYQk2b+oTAAAAAElFTkSuQmCC
 "
 >
 </div>
 
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The difference in the extent of fluctuations is further illustrated when we remove the offset from the non-normalized ratios (blue) by dividing it with an absolute value (here we use 1.027) and plot it against the internally-normalized ratios (orange).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">R</span><span class="p">),</span><span class="n">R</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">./</span><span class="mf">1.027</span><span class="p">,</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mi">0</span> <span class="mf">0.4470</span> <span class="mf">0.7410</span><span class="p">]);</span>
+<span class="n">hold</span> <span class="s">on</span>
+<span class="n">plot</span><span class="p">(</span><span class="mi">1</span><span class="p">:</span><span class="nb">length</span><span class="p">(</span><span class="n">RIN</span><span class="p">),</span><span class="n">RIN</span><span class="p">(:,</span><span class="n">ratisos</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span><span class="s">&#39;Color&#39;</span><span class="p">,[</span><span class="mf">0.8500</span> <span class="mf">0.3250</span> <span class="mf">0.0980</span><span class="p">])</span>
+
+<span class="n">hold</span> <span class="s">off</span>
+<span class="n">legend</span><span class="p">(</span><span class="s">&#39;Non-normalized&#39;</span><span class="p">,</span><span class="s">&#39;Internally-normalized&#39;</span><span class="p">,</span><span class="s">&#39;Location&#39;</span><span class="p">,</span><span class="s">&#39;best&#39;</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+
+
+<div class="output_png output_subarea ">
+<img src="data:image/png;base64,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7unpqa2t/de//lVXVzd58uRf/epXlEMx7kA/VGdn586dO995550XXnjhxo0bO3bsQAjV19frdLqpU6f+9Kc//eyzz86ePYsrXh46dOill15auXLlgQMH9Hr9mjVriNO53W6bzTZ37tw1a9asWbMmMzPz4sWLGRkZZ86cefTRRwsKCurr669du5afn48QslqtCxYseOKJJ/bu3TtkyBBCKQRkARJjgxqTXlc6PXlFfeuSjKRAjwUQw4r61lc/C4DR9dWHk0unJ5O3REdHr1279r/+67/I7Zv/+te/3nXXXatWrUII/fnPf961a1dtbe3QoUOjoqLWr1+v0+l++ctfTps27dy5c2fOnMEfycjIQAhRdmA81OHDh3t6eo4dO5aSkvLxxx/Hx8dXVFSEhYU9+uijbrf7pZdeQghlZ2fj5jVxcXHvvffeokWL7Ha7Xq8nOtoQYMXom2++2b59+6ZNm5KTk1977bV777133rx5CKGysrIHHnjAbrdv3br13//933/zm98ghP7t3/6trq7OX5c4KAGBFLy0Od2meJ0pPrLR1t1oc5pT4gM9IkAwpdOpgiGAzJ07t6qq6tlnnyW6ZZ49e5ZoKBMREXHXXXedOXNm6NCh2HSGEBo8eLDH4/nggw9efPFFvNupU6cQQpQdGA9lt9tHjRqVkpKCNw4dOjQsLAwhFB4enpx885rgLQihUaNGvfHGGy+++GJPT8/gwYPvvfde+vjdbve8efOefPLJOXPmIIS+++67r776auTIkcQO586da29vv+uuu/DbQYMGBU8NBWUAk13w0uboNekjTXrdkoykL77tDvRwgIHAunXrdu7cuXPnTvx22LBhnZ0/GIQ7OjpwlWRyDxqE0HPPPdd7izFjxtB3YDxUTExMbGwsz4H97//+b319/eeff+50Op966inGfZ599lmdTvf666/jt4mJibm5uS6Xy+VyXb169YsvvkhLSzMYDORhnD9/nucAAD6AQAJQfkbipiPgRgJkYMyYMS+99BJ25yCEZs6cuWfPnk8++QQh9Pbbb9tstunTp4s7Mv1QgiLLz507l5ycfOedd3Z2dr7//vv9/f2UHd57772tW7du3Lixv7/f5XL19/fPmDHj008/PXHixKBBg956663i4uI77rjjP/7jPxoaGj777DOv1/vWW2+dPXtW3NcBGAGTHYDMKfGmeB1Y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
+"
+>
+</div>
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="2.-Comparison-with-Hu-&amp;-Dauphas-(2017)">2. Comparison with Hu &amp; Dauphas (2017)<a class="anchor-link" href="#2.-Comparison-with-Hu-&amp;-Dauphas-(2017)">&#182;</a></h2><p>Here, we compare the estimated uncertainties associated with correcitng for the offsets introduced by isotope anomalies on the resulting value for $\alpha$.</p>
+<p>We use the 130-137 spike combination presecribed by the <code>cosmo.m</code> function (~49%-51% of $^{130}Ba$ and $^{137}Ba$ ORNL spikes, respectively), with a 50% splitting and 50% spike proportion.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% re-starting the DS Toolbox</span>
+<span class="n">dsstartup</span><span class="p">;</span>
+<span class="n">global</span> <span class="s">ISODATA</span><span class="p">;</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Welcome to the double spike toolbox.    John F. Rudge 2009-2022.
+Default parameters are stored in the global variable ISODATA.
+Type &#34;global ISODATA&#34; to access and set these parameters.
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% INPUT parameters</span>
+<span class="n">element</span><span class="p">=</span><span class="s">&#39;Ba&#39;</span><span class="p">;</span>
+<span class="n">prop</span><span class="p">=</span><span class="mf">0.5</span><span class="p">;</span>
+<span class="n">split</span><span class="p">=</span><span class="mf">0.5</span><span class="p">;</span>
+<span class="n">spike</span><span class="p">=[</span><span class="mf">0.182797</span> <span class="mf">0.004525</span> <span class="mf">0.017545</span> <span class="mf">0.031156</span> <span class="mf">0.030334</span> <span class="mf">0.452349</span> <span class="mf">0.281295</span><span class="p">];</span>
+<span class="n">cycles</span><span class="p">=</span><span class="mi">40</span><span class="p">;</span>
+
+<span class="n">deltat</span><span class="p">=</span><span class="mi">8</span><span class="p">;</span> <span class="c">% seconds</span>
+<span class="n">R_ref</span><span class="p">=</span><span class="mf">1e11</span><span class="p">;</span> <span class="c">% ohms</span>
+<span class="n">R</span><span class="p">=[</span><span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span> <span class="mf">1e11</span><span class="p">;</span> <span class="n">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11</span> <span class="s">1e11]</span><span class="p">;</span>
+     
+<span class="n">sample</span><span class="p">=</span><span class="mi">1</span><span class="p">;</span> <span class="c">% ng</span>
+     
+<span class="n">effIC</span> <span class="p">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="c">% ionization efficiency of the IC measurement</span>
+<span class="n">effID</span> <span class="p">=</span> <span class="mf">0.01</span><span class="p">;</span> <span class="c">% ionization efficiency of the ID measurement</span>
+<span class="n">T</span>     <span class="p">=</span> <span class="mi">300</span><span class="p">;</span> <span class="c">% temperature of the resistor/faraday cup; in Kelvin</span>
+
+<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">sample</span><span class="p">,[</span><span class="n">effIC</span> <span class="n">effID</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We then check the equivalent voltage with these parameters.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">V100</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+   8.7825e+03
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>With the expected splitting, ionization efficiency, and number of cycles, we can calculate the expect voltage per integration:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">V</span><span class="p">=</span><span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">V100</span><span class="o">*</span><span class="n">split</span><span class="o">*</span><span class="n">effID</span><span class="o">/</span><span class="n">cycles</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+V =
+
+    1.0978
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can then use this as the voltage for estimating the uncertainty for the double spike measurement without accounting for the uncertainty on any unspiked measurement:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% resetting the DS Toolbox by removing the parameters from shake</span>
+<span class="n">dsstartup</span><span class="p">;</span>
+<span class="n">global</span> <span class="s">ISODATA</span><span class="p">;</span>
+<span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">measured</span><span class="p">.</span><span class="n">type</span><span class="p">=</span><span class="s">&#39;fixed-sample&#39;</span><span class="p">;</span>
+
+<span class="n">ISODATA</span><span class="p">.</span><span class="n">Ba</span><span class="p">.</span><span class="n">errormodel</span><span class="p">.</span><span class="n">measured</span><span class="p">.</span><span class="n">intensity</span> <span class="p">=</span> <span class="n">V</span><span class="p">;</span>
+<span class="n">ID</span><span class="p">=</span><span class="n">errorestimate</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,[</span><span class="mi">130</span> <span class="mi">135</span> <span class="mi">137</span> <span class="mi">138</span><span class="p">])</span><span class="o">/</span><span class="nb">sqrt</span><span class="p">(</span><span class="n">cycles</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>Welcome to the double spike toolbox.    John F. Rudge 2009-2022.
+Default parameters are stored in the global variable ISODATA.
+Type &#34;global ISODATA&#34; to access and set these parameters.
+
+ID =
+
+    0.0021
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>Next, we calculate the additional uncertainty from the unspiked measurement according to the formula from <a href="https://doi.org/10.1039/C7JA00187H">Hu and Dauphas (2017)</a>. The offset introduced by isotope anomalies, $d\alpha$, can be calculated using the Eq. 14 from this paper:</p>
+$$d\alpha = -\frac{1}{10^4}\frac{\begin{vmatrix}\varepsilon_{2/1} &amp; \varepsilon_{3/1} &amp; \varepsilon_{4/1}\\
+t_{2/1} &amp; t_{3/1} &amp; t_{4/1}\\
+\left(t_{2/1}+\frac{1}{f}\right)\mu_{2/1} &amp; \left(t_{3/1}+\frac{1}{f}\right)\mu_{3/1} &amp; \left(t_{4/1}+\frac{1}{f}\right)\mu_{4/1}\\
+\end{vmatrix}}{\begin{vmatrix}\mu_{2/1} &amp; \mu_{3/1} &amp; \mu_{4/1}\\
+t_{2/1} &amp; t_{3/1} &amp; t_{4/1}\\
+t_{2/1}\mu_{2/1} &amp; t_{3/1}\mu_{3/1} &amp; t_{4/1}\mu_{4/1}\\
+\end{vmatrix}}$$<p>which can then be re-written with the shorthand notation:</p>
+$$d\alpha = -\frac{1}{10^4D}\cdot\left(F_{2/1}\varepsilon_{2/1}+F_{3/1}\varepsilon_{3/1}+F_{4/1}\varepsilon_{4/1}\right)$$<p>where F_{i/1} represent cofractors of the numerator matrix, while $D$ is the determinant of the denominator matrix. The additional uncertainty associated with $d\alpha$ is then:</p>
+$$\sigma_{d\alpha}=-\frac{1}{10^4D}\cdot \sqrt{\left(F_{2/1}\sigma_{\varepsilon_{2/1}}\right)^2+\left(F_{3/1}\sigma_{\varepsilon_{2/1}}\right)^2+\left(F_{4/1}\sigma_{\varepsilon_{2/1}}\right)^2}$$<p>$\sigma_{d\alpha}$ is the first output from the function <code>addederror.m</code>, which implements the formula shown here. Note that this added uncertainty from the correction of $d\alpha$ is not directly dependent on the value of $\varepsilon_{i/1}$, but rather its uncertainty, which can be theoretically calculated using the error model already built into the DS Toolbox's <code>ISODATA</code> sturcture.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="c">% re-introducing the additional parameters from shake</span>
+<span class="n">shake</span><span class="p">(</span><span class="n">element</span><span class="p">,</span><span class="n">sample</span><span class="p">,[</span><span class="n">effIC</span> <span class="n">effID</span><span class="p">],[</span><span class="n">cycles</span> <span class="n">cycles</span><span class="p">],</span><span class="n">R</span><span class="p">,</span><span class="n">R_ref</span><span class="p">,</span><span class="n">T</span><span class="p">,</span><span class="n">deltat</span><span class="p">)</span>
+
+<span class="c">% here, we use a normalization to the 134/138 ratio</span>
+<span class="n">IC</span><span class="p">=</span><span class="n">addederror</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="n">split</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,[</span><span class="mi">130</span> <span class="mi">135</span> <span class="mi">137</span> <span class="mi">138</span><span class="p">],[</span><span class="mi">134</span> <span class="mi">138</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+IC =
+
+    0.0036
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The total uncertainty on $\alpha$ is then the quadratic sum of the ID and IC measurement uncertainties:</p>
+$$\sigma_{\alpha}^{corr} = \sqrt{\left(\sigma_{\alpha}^{uncorr}\right)^2 + \left(\sigma_{d\alpha}\right)^2}$$
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">sigma_alpha</span><span class="p">=</span><span class="nb">hypot</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span><span class="n">IC</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+sigma_alpha =
+
+    0.0042
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can then compare this result to the estimate using <code>errorwsplit.m</code> directly:</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="n">split</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,[</span><span class="mi">130</span> <span class="mi">135</span> <span class="mi">137</span> <span class="mi">138</span><span class="p">],[</span><span class="mi">134</span> <span class="mi">138</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+    0.0043
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The uncertainties are almost exactly the same. We can try a different normalization scheme to check.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">IC2</span><span class="p">=</span><span class="n">addederror</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="n">split</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,[</span><span class="mi">130</span> <span class="mi">135</span> <span class="mi">137</span> <span class="mi">138</span><span class="p">],[</span><span class="mi">138</span> <span class="mi">130</span><span class="p">])</span>
+<span class="n">sigma_alpha2</span><span class="p">=</span><span class="nb">hypot</span><span class="p">(</span><span class="n">ID</span><span class="p">,</span><span class="n">IC2</span><span class="p">)</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+IC2 =
+
+    0.0317
+
+
+sigma_alpha2 =
+
+    0.0318
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[41]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-matlab"><pre><span></span><span class="n">errorwsplit</span><span class="p">(</span><span class="s">&#39;Ba&#39;</span><span class="p">,</span><span class="n">split</span><span class="p">,</span><span class="n">prop</span><span class="p">,</span><span class="n">spike</span><span class="p">,[</span><span class="mi">130</span> <span class="mi">135</span> <span class="mi">137</span> <span class="mi">138</span><span class="p">],[</span><span class="mi">138</span> <span class="mi">130</span><span class="p">])</span>
+</pre></div>
+
+    </div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+    <div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+ans =
+
+    0.0333
+
+</pre>
+</div>
 </div>
 
 </div>
